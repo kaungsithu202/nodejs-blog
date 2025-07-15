@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
-const Post = require("../config/models/Post");
+const Post = require("../models/Post");
 
 function insertPostData() {
 	Post.insertMany([
@@ -72,6 +71,34 @@ router.get("/post/:id", async (req, res) => {
 		locals,
 		data,
 	});
+});
+
+router.post("/search", async (req, res) => {
+	const locals = {
+		title: "Nodejs Blog",
+		description: "A blog built with Node.js and Express",
+	};
+
+	try {
+		const searchTerm = req.body.searchTerms;
+		const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9\s]/g, "");
+
+		const data = await Post.find({
+			$or: [
+				{
+					title: { $regex: new RegExp(searchNoSpecialChar, "i") },
+					body: { $regex: new RegExp(searchNoSpecialChar, "i") },
+				},
+			],
+		});
+
+		res.render("search", {
+			locals,
+			data,
+		});
+	} catch (error) {
+		console.log(error);
+	}
 });
 
 router.get("/about", (req, res) => {
