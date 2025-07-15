@@ -53,6 +53,7 @@ router.get("", async (req, res) => {
 		data,
 		current: page,
 		nextPage: hasNextPage ? nextPage : null,
+		currentRoute: `/`,
 	});
 });
 
@@ -70,6 +71,7 @@ router.get("/post/:id", async (req, res) => {
 	res.render("post", {
 		locals,
 		data,
+		currentRoute: `/post/${slug}`,
 	});
 });
 
@@ -80,7 +82,7 @@ router.post("/search", async (req, res) => {
 	};
 
 	try {
-		const searchTerm = req.body.searchTerms;
+		const searchTerm = req.body.searchTerm;
 		const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9\s]/g, "");
 
 		const data = await Post.find({
@@ -95,6 +97,7 @@ router.post("/search", async (req, res) => {
 		res.render("search", {
 			locals,
 			data,
+			currentRoute: `/`,
 		});
 	} catch (error) {
 		console.log(error);
@@ -102,7 +105,7 @@ router.post("/search", async (req, res) => {
 });
 
 router.get("/about", (req, res) => {
-	res.render("about");
+	res.render("about", { currentRoute: "/about" });
 });
 
 module.exports = router;

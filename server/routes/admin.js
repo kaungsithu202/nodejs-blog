@@ -28,7 +28,11 @@ router.get("/admin", (req, res) => {
 		title: "Admin",
 		description: "Admin Dashboard",
 	};
-	res.render("admin/index", { locals, layout: adminLayout });
+	res.render("admin/index", {
+		locals,
+		layout: adminLayout,
+		currentRoute: "/admin",
+	});
 });
 
 router.post("/admin", async (req, res) => {
@@ -100,6 +104,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 			locals,
 			data,
 			layout: adminLayout,
+			currentRoute: "/dashboard",
 		});
 	} catch (err) {
 		console.log(err);
@@ -119,6 +124,7 @@ router.get("/add-post", authMiddleware, async (req, res) => {
 			locals,
 			data,
 			layout: adminLayout,
+			currentRoute: "/add-post",
 		});
 	} catch (err) {
 		console.log(err);
@@ -143,6 +149,55 @@ router.post("/add-post", authMiddleware, async (req, res) => {
 	} catch (err) {
 		console.log(err);
 	}
+});
+
+router.get("/edit-post/:id", authMiddleware, async (req, res) => {
+	try {
+		const slug = req.params.id;
+		const data = await Post.findOne({ _id: slug });
+
+		const locals = {
+			title: "Edit Post",
+			description: "Welcome to the admin dashboard",
+		};
+
+		res.render("admin/edit-post", {
+			data,
+			locals,
+			layout: adminLayout,
+		});
+	} catch (err) {
+		console.log(err);
+	}
+});
+
+router.put("/edit-post/:id", authMiddleware, async (req, res) => {
+	try {
+		await Post.findByIdAndUpdate(req.params.id, {
+			title: req.bdoy.title,
+			body: req.body.body,
+			updateAt: Date.now(),
+		});
+
+		res.redirect(`/edit-post/${req.params.id}`);
+	} catch (err) {
+		console.log(err);
+	}
+});
+
+router.delete("/delete-post/:id", authMiddleware, async (req, res) => {
+	try {
+		await Post.deleteOne({ _id: req.params.id });
+
+		res.redirect(`/dashboard`);
+	} catch (err) {
+		console.log(err);
+	}
+});
+
+router.get("/logout", (req, res) => {
+	res.clearCookie("token");
+	res.redirect("/");
 });
 
 module.exports = router;
